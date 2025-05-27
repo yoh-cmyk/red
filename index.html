@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>방문자 카운터</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 393px;
+            height: 852px;
+            background: #000000;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            overflow-y: auto;
+            color: #FF0000;
+            padding: 40px 20px 30px 20px;
+        }
+
+        .top-section {
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding-top: 40px;
+        }
+
+        .title {
+            color: #FF0000;
+            font-size: 24px;
+            font-weight: normal;
+            margin-bottom: 80px;
+            text-align: left;
+            width: 100%;
+            padding-left: 15px;
+        }
+
+        .counter-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .counter-number {
+            color: #FF0000;
+            font-size: 180px;
+            font-weight: bold;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+
+        .counter-suffix {
+            color: #FF0000;
+            font-size: 28px;
+            font-weight: normal;
+            margin-bottom: 40px;
+            text-align: right;
+            width: 100%;
+            padding-right: 20px;
+        }
+
+        .description {
+            color: #FF0000;
+            font-size: 18px;
+            font-weight: normal;
+            margin-bottom: 60px;
+            line-height: 1.4;
+        }
+
+        .bottom-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            text-align: center;
+        }
+
+        .personal-message {
+            color: #FF0000;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            text-align: left;
+            padding: 0 10px;
+        }
+
+        .message-title {
+            color: #FF0000;
+            font-size: 16px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .timestamp-label {
+            color: #FF0000;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .timestamp {
+            color: #FF0000;
+            font-size: 12px;
+            opacity: 0.8;
+            line-height: 1.4;
+            max-height: 100px;
+            overflow-y: auto;
+            text-align: left;
+            padding: 0 10px;
+        }
+
+        .visit-record {
+            margin-bottom: 3px;
+        }
+
+        /* @ 모양 리셋 버튼 */
+        .reset-button {
+            color: #FF0000;
+            font-size: 24px;
+            font-weight: bold;
+            background: transparent;
+            border: 2px solid transparent;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .reset-button:hover {
+            background: #FF0000;
+            color: #000000;
+            transform: scale(1.1);
+        }
+
+        .reset-button:active {
+            transform: scale(0.95);
+        }
+
+        /* 애니메이션 효과 */
+        .counter-number.updated {
+            animation: pulse 0.6s ease;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-section">
+        <div class="title">당신은...</div>
+    </div>
+
+    <div class="counter-section">
+        <div class="counter-number" id="counter">0</div>
+        <div class="counter-suffix">번째</div>
+        <div class="description">혁명형 방문자 입니다.</div>
+    </div>
+
+    <div class="bottom-section">
+        <div class="message-title">당신을 위한 속마음 한 마디:</div>
+        <div class="personal-message">
+            차별, 혐오, 불균형… 도저히 모른 척할 수 없었던 당신은 날카로운 시선과 감각으로 질문을 던졌습니다.하지만 그 날카로움이 늘 당신의 심장을 먼저 찌르고 있진 않았나요? 세상을 바꾸는 건 콘텐츠가 아니라 사람입니다. 당신의 말, 당신의 움직임, 그리고 당신과 같은 목소리가 모일 때 비로소 새로운 장이 시작되죠. 하지만 당신만 그 사실을 아는 것이 아닐 수도 있어요. 모두가 묵인할 수도 분위기 맞춰 넘어가는 때도 있죠. 주변을 한번 돌아보는 것도 좋을 듯하네요. 당신의 감각은 예리하고, 또한 유효합니다. 멈추지 마세요.
+        </div>
+        <div class="timestamp-label">기록 (한국 시간 기준)</div>
+        <div class="timestamp" id="lastVisit"></div>
+        <button class="reset-button" onclick="resetCounter()" title="방문자 수 초기화">@</button>
+    </div>
+
+    <script>
+        // 60초 후 창 닫기 타이머
+        let closeTimer;
+        let remainingTime = 60;
+        
+        function startCloseTimer() {
+            closeTimer = setTimeout(() => {
+                // 창 닫기 시도
+                if (window.opener || window.parent !== window) {
+                    // 팝업 창이거나 iframe인 경우
+                    window.close();
+                } else {
+                    // 일반 브라우저 탭인 경우 - 사용자에게 알림
+                    alert('60초가 경과했습니다. 창을 닫아주세요.');
+                    // 또는 페이지를 빈 페이지로 리다이렉트
+                    // window.location.href = 'about:blank';
+                }
+            }, 60000); // 60초 = 60000 밀리초
+        }
+        
+        // 남은 시간 표시 (선택사항 - 사용자가 원하면 활성화)
+        function updateCountdown() {
+            // 카운트다운을 표시하고 싶다면 이 함수를 사용
+            const countdownInterval = setInterval(() => {
+                remainingTime--;
+                if (remainingTime <= 0) {
+                    clearInterval(countdownInterval);
+                }
+                // 필요시 화면에 남은 시간 표시 가능
+            }, 1000);
+        }
+        // 방문자 카운터 관리
+        function updateCounter() {
+            // localStorage에서 현재 카운트 가져오기
+            let currentCount = localStorage.getItem('visitorCount');
+            
+            if (currentCount === null) {
+                currentCount = 0;
+            } else {
+                currentCount = parseInt(currentCount);
+            }
+            
+            // 카운트 증가
+            currentCount++;
+            
+            // localStorage에 저장
+            localStorage.setItem('visitorCount', currentCount);
+            
+            // 화면에 표시
+            const counterElement = document.getElementById('counter');
+            counterElement.textContent = currentCount.toLocaleString();
+            
+            // 애니메이션 효과 추가
+            counterElement.classList.add('updated');
+            setTimeout(() => {
+                counterElement.classList.remove('updated');
+            }, 600);
+            
+            // 방문 시간 기록 (배열로 누적 저장)
+            const now = new Date();
+            const timestamp = now.toLocaleString('ko-KR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            // 기존 방문 기록 가져오기
+            let visitHistory = localStorage.getItem('visitHistory');
+            if (visitHistory === null) {
+                visitHistory = [];
+            } else {
+                visitHistory = JSON.parse(visitHistory);
+            }
+            
+            // 새 방문 기록 추가
+            visitHistory.push({
+                visitNumber: currentCount,
+                timestamp: timestamp
+            });
+            
+            // localStorage에 저장
+            localStorage.setItem('visitHistory', JSON.stringify(visitHistory));
+            
+            // 화면에 모든 방문 기록 표시
+            displayVisitHistory(visitHistory);
+        }
+        
+        // 방문 기록 표시 함수
+        function displayVisitHistory(history) {
+            const timestampElement = document.getElementById('lastVisit');
+            
+            if (history.length === 0) {
+                timestampElement.innerHTML = '';
+                return;
+            }
+            
+            // 최근 5개 기록만 표시 (화면 공간 고려)
+            const recentHistory = history.slice(-5);
+            let historyHTML = '';
+            
+            recentHistory.forEach(record => {
+                historyHTML += `<div class="visit-record">${record.visitNumber}번째: ${record.timestamp}</div>`;
+            });
+            
+            // 5개보다 많은 기록이 있으면 표시
+            if (history.length > 5) {
+                historyHTML = `<div class="visit-record">... (이전 ${history.length - 5}개 기록)</div>` + historyHTML;
+            }
+            
+            timestampElement.innerHTML = historyHTML;
+        }
+        
+        // 카운터 초기화 함수
+        function resetCounter() {
+            if (confirm('정말로 카운터를 초기화하시겠습니까?')) {
+                localStorage.setItem('visitorCount', '0');
+                document.getElementById('counter').textContent = '0';
+                localStorage.removeItem('visitHistory'); // 방문 기록도 함께 삭제
+                document.getElementById('lastVisit').innerHTML = '';
+                
+                // 페이지 새로고침으로 카운터 재시작
+                setTimeout(() => {
+                    location.reload();
+                }, 100);
+            }
+        }
+        
+        // 페이지 로드시 실행
+        window.addEventListener('load', function() {
+            updateCounter();
+            startCloseTimer(); // 60초 타이머 시작
+        });
+        
+        // 기존 방문 기록이 있으면 표시 (새로고침 시)
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedHistory = localStorage.getItem('visitHistory');
+            if (savedHistory) {
+                const history = JSON.parse(savedHistory);
+                displayVisitHistory(history);
+            }
+        });
+    </script>
+</body>
+</html>
